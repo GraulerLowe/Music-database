@@ -40,7 +40,7 @@ func main() {
     }
 
     // Abrir la base de datos
-    database, err := sql.Open("sqlite3", "/home/grauler/Vídeos/Base.db")
+    database, err := sql.Open("sqlite3", "/home/grauler/Documentos/Ciencias de la Computacion/3 semestre/Modelado Y Programacion/Music-database/src/Base/Base.db")
     if err != nil {
         panic(err)
     }
