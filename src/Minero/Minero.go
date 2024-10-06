@@ -42,6 +42,12 @@ func MinarDirectorio(ruta string) ([]SongMetaData, error) {
 			}
 			track, totalTracks := metadata.Track()
 			// Crear instancia de SongMetaData con valores predeterminados si faltan etiquetas
+
+			if totalTracks > 0 && track > totalTracks {
+                log.Printf("Número de pista inválido en %s: pista %d, total de pistas %d. Asignando valor predeterminado.", path, track, totalTracks)
+                track = 1 // Asignar un valor predeterminado
+            }
+			
 			song := SongMetaData{
 				Artist: metadata.Artist(),
 				Title:  metadata.Title(),
