@@ -1,12 +1,14 @@
 package Interfaz
 
 import (
+	"fyne.io/fyne/v2"
     "fyne.io/fyne/v2/app"
     "fyne.io/fyne/v2/container"
     "fyne.io/fyne/v2/widget"
+	"log"
 )
 
-func CrearVentana(onClickFunc func(ruta string)) {
+func CrearVentana(onClickFunc func(ruta string), onListFunc func() ([]string, error)) {
     a := app.New()
     w := a.NewWindow("Music Database Miner")
 
@@ -19,20 +21,29 @@ func CrearVentana(onClickFunc func(ruta string)) {
         onClickFunc(ruta)
         resultLabel.SetText("Metadatos guardados exitosamente")
     })
-	
-	baseEntry := widget.NewEntry()
 
-	ms := widget.NewButton("Canciones almacenadas", func() {
-		base := baseEntry.Text
-		onClickFunc(base)
-		resultLabel.SetText("Canciones en la base de datos")
-	})
-		
-		
+	listLabel := widget.NewLabel("")
+	scrollContainer := container.NewScroll(listLabel)
+	scrollContainer.SetMinSize(fyne.NewSize(400, 300))
+	
+    ms := widget.NewButton("Canciones almacenadas", func() {
+        canciones, err := onListFunc()
+        if err != nil {
+            log.Printf("Error al listar las canciones: %v", err)
+            resultLabel.SetText("Error al listar las canciones")
+            return
+        }
+        listLabel.SetText("")
+        for _, cancion := range canciones {
+            listLabel.SetText(listLabel.Text + cancion + "\n")
+        }
+    })
+
     w.SetContent(container.NewVBox(
         rutaEntry,
         btn,
-		ms,
+        ms,
+		scrollContainer,
         resultLabel,
     ))
 

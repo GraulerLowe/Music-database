@@ -7,6 +7,7 @@ import (
     "Music-database/src/Interfaz"
     _ "github.com/mattn/go-sqlite3"
     "path/filepath"
+	"fmt"
 )
 
 func GuardarMetadatosEnBD(database *sql.DB, songs []Minero.SongMetaData, rutaBase string) error {
@@ -49,25 +50,58 @@ func GuardarMetadatosEnBD(database *sql.DB, songs []Minero.SongMetaData, rutaBas
 
 func minarYGuardar(ruta string) {
     // Abrir la base de datos
-    database, err := sql.Open("sqlite3", "/home/grauler/Documentos/Ciencias de la Computacion/3 semestre/Modelado Y Programacion/Music-database/src/Base/Base.db")
+    database, err := sql.Open("sqlite3", "/home/grauler/Vídeos/Base.db")
     if err != nil {
-        log.Fatalf("Error al abrir la base de datos: %v", err)
+        log.Printf("Error al abrir la base de datos: %v", err)
     }
     defer database.Close()
 
     // Llamada a la función MinarDirectorio
     songs, err := Minero.MinarDirectorio(ruta)
     if err != nil {
-        log.Fatalf("Error al minar el directorio: %v", err)
+        log.Printf("Error al minar el directorio: %v", err)
     }
 
     // Guardar metadatos en la base de datos
     err = GuardarMetadatosEnBD(database, songs, ruta)
     if err != nil {
-        log.Fatalf("Error al guardar metadatos en la base de datos: %v", err)
+        log.Printf("Error al guardar metadatos en la base de datos: %v", err)
     }
 }
 
-func main() {
-    Interfaz.CrearVentana(minarYGuardar)
+func listarCanciones() ([]string, error) {
+    database, err := sql.Open("sqlite3", "/home/grauler/Vídeos/Base.db")
+    if err != nil {
+        return nil, err
+    }
+    defer database.Close()
+
+    return ListarCanciones(database)
 }
+
+func ListarCanciones(database *sql.DB) ([]string, error) {
+    rows, err := database.Query(`SELECT title, track, year, genre FROM rolas`)
+    if err != nil {
+        return nil, err
+    }
+    defer rows.Close()
+
+    var canciones []string
+    for rows.Next() {
+        var title, genre string
+        var track, year int
+        err = rows.Scan(&title, &track, &year, &genre)
+        if err != nil {
+            return nil, err
+        }
+        canciones = append(canciones, fmt.Sprintf("Título: %s, Pista: %d, Año: %d, Género: %s", title,track, year, genre))
+    }
+
+    return canciones, nil
+}
+
+func main() {
+        Interfaz.CrearVentana(minarYGuardar, listarCanciones)
+
+}
+
