@@ -1,24 +1,42 @@
 package main
 
 import (
-	"path/filepath"
-	"database/sql"
-	"fmt"
-	"log"
-	"Music-database/src/Minero"
-		_ "github.com/mattn/go-sqlite3"
+    "database/sql"
+    "log"
+    "Music-database/src/Minero"
+    "Music-database/src/Interfaz"
+    _ "github.com/mattn/go-sqlite3"
+    "path/filepath"
 )
 
 func GuardarMetadatosEnBD(database *sql.DB, songs []Minero.SongMetaData, rutaBase string) error {
-    stmt, err := database.Prepare(`INSERT INTO rolas (id_performer, id_album, path, title, track, year, genre) VALUES (?, ?, ?, ?, ?, ?, ?)`)
+    stmtSelect, err := database.Prepare(`SELECT COUNT(*) FROM rolas WHERE path = ?`)
     if err != nil {
         return err
     }
-    defer stmt.Close()
+    defer stmtSelect.Close()
+
+    stmtInsert, err := database.Prepare(`INSERT INTO rolas (id_performer, id_album, path, title, track, year, genre) VALUES (?, ?, ?, ?, ?, ?, ?)`)
+    if err != nil {
+        return err
+    }
+    defer stmtInsert.Close()
 
     for _, song := range songs {
         rutaCompleta := filepath.Join(rutaBase, song.Title + ".mp3") // Crear ruta completa del archivo
-        _, err = stmt.Exec(1, 1, rutaCompleta, song.Title, song.Track, song.Year, song.Genre) // Suponiendo id_performer e id_album = 1
+
+        var count int
+        err = stmtSelect.QueryRow(rutaCompleta).Scan(&count)
+        if err != nil {
+            return err
+        }
+
+        if count > 0 {
+            log.Printf("Canción ya existente: %s, saltando inserción.", song.Title)
+            continue
+        }
+
+        _, err = stmtInsert.Exec(1, 1, rutaCompleta, song.Title, song.Track, song.Year, song.Genre) 
         if err != nil {
             log.Printf("Error al insertar la canción %s: %v", song.Title, err)
             continue
@@ -28,21 +46,12 @@ func GuardarMetadatosEnBD(database *sql.DB, songs []Minero.SongMetaData, rutaBas
     return nil
 }
 
-func main() {
-    // Ruta del directorio que contiene los archivos MP3
-    var ruta string
 
-    // Solicitar al usuario que ingrese la ruta del directorio
-    fmt.Print("Introduce la ruta del directorio que contiene los archivos MP3: ")
-    _, err := fmt.Scanf("%s", &ruta)
-    if err != nil {
-        log.Fatalf("Error al leer la ruta: %v", err)
-    }
-
+func minarYGuardar(ruta string) {
     // Abrir la base de datos
     database, err := sql.Open("sqlite3", "/home/grauler/Documentos/Ciencias de la Computacion/3 semestre/Modelado Y Programacion/Music-database/src/Base/Base.db")
     if err != nil {
-        panic(err)
+        log.Fatalf("Error al abrir la base de datos: %v", err)
     }
     defer database.Close()
 
@@ -57,12 +66,8 @@ func main() {
     if err != nil {
         log.Fatalf("Error al guardar metadatos en la base de datos: %v", err)
     }
+}
 
-    // Mostrar la metadata extraída
-    for _, song := range songs {
-        fmt.Printf("Título: %s\nArtista: %s\nÁlbum: %s\nAño: %d\nGénero: %s\nTrack: %d\n\n", 
-            song.Title, song.Artist, song.Album, song.Year, song.Genre, song.Track)
-    }
-
-    log.Println("Metadatos guardados exitosamente")
+func main() {
+    Interfaz.CrearVentana(minarYGuardar)
 }
