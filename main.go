@@ -1,6 +1,7 @@
 package main
 
 import (
+	"os"
     "database/sql"
     "log"
     "Music-database/src/Minero"
@@ -10,6 +11,23 @@ import (
     "path/filepath"
     "fmt"
 )
+
+func dirHOME() string {
+    dirname, err := os.UserHomeDir()
+    if err != nil {
+        log.Fatal(err)
+    }
+    fmt.Println(dirname)
+
+    dbPath := filepath.Join(dirname, ".local", "share", "Music-database")
+
+    err = os.MkdirAll(dbPath, os.ModePerm)
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    return dbPath
+}
 
 func GuardarMetadatosEnBD(database *sql.DB, songs []Minero.SongMetaData, rutaBase string) error {
     stmtSelect, err := database.Prepare(`SELECT COUNT(*) FROM rolas WHERE path = ?`)
@@ -50,8 +68,12 @@ func GuardarMetadatosEnBD(database *sql.DB, songs []Minero.SongMetaData, rutaBas
 }
 
 func minarYGuardar(ruta string) {
+
+	dbPath := dirHOME()
+    dbFilePath := filepath.Join(dbPath, "Base.db")
+	
     // Abrir la base de datos
-    database, err := sql.Open("sqlite3", "/home/grauler/Vídeos/Base.db")
+    database, err := sql.Open("sqlite3", dbFilePath)
     if err != nil {
         log.Printf("Error al abrir la base de datos: %v", err)
        
@@ -85,7 +107,11 @@ func minarYGuardar(ruta string) {
 }
 
 func listarCanciones() ([]string, error) {
-    database, err := sql.Open("sqlite3", "/home/grauler/Vídeos/Base.db")
+
+	dbPath := dirHOME()
+    dbFilePath := filepath.Join(dbPath, "Base.db")
+	
+    database, err := sql.Open("sqlite3", dbFilePath)
     if err != nil {
         return nil, err
     }
@@ -123,7 +149,10 @@ func ListarCanciones(database *sql.DB) ([]string, error) {
 // Nueva función para buscar canciones
 func BuscarCanciones(criterio string) ([]string, error) {
     // Abrir conexión a la base de datos
-    database, err := sql.Open("sqlite3", "/home/grauler/Vídeos/Base.db")
+	dbPath := dirHOME()
+    dbFilePath := filepath.Join(dbPath, "Base.db")
+	
+    database, err := sql.Open("sqlite3", dbFilePath)
     if err != nil {
         return nil, err
     }
@@ -140,7 +169,7 @@ func BuscarCanciones(criterio string) ([]string, error) {
     for rows.Next() {
         var title, genre, track string
         var year int
-        // Escanear los resultados
+        
         err = rows.Scan(&title, &track, &year, &genre)
         if err != nil {
             return nil, err

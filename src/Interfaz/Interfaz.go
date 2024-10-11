@@ -42,21 +42,21 @@ func CrearVentana(onClickFunc func(ruta string), onListFunc func() ([]string, er
         for _, cancion := range canciones {
             listLabel.SetText(listLabel.Text + cancion + "\n")
         }
-        scrollContainer.Show() // Mostrar la lista de canciones
-        volver.Show() // Mostrar el botón de "Volver"
-        ms.Hide() // Ocultar el botón de "Canciones almacenadas"
+        scrollContainer.Show() 
+        volver.Show() 
+        ms.Hide() 
     })
 
     volver = widget.NewButton("Volver", func() {
-        scrollContainer.Hide() // Ocultar la lista de canciones
-        volver.Hide() // Ocultar el botón de "Volver"
-        ms.Show() // Mostrar el botón de "Canciones almacenadas"
+        scrollContainer.Hide() 
+        volver.Hide()
+        ms.Show()
     })
-    volver.Hide() // Ocultar por defecto
+    volver.Hide() 
 
     // Crear botón de salida
     exit := widget.NewButton("Salir", func() {
-        a.Quit() // Cerrar la aplicación
+        a.Quit() 
     })
 
 	var searchEntry *widget.Entry
