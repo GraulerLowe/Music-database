@@ -43,7 +43,8 @@ Dentro de la carpeta del programa, puede ejectutarlo con el siguiente comando en
 ### Minado
 
 Para mirar tienes que escribir la rura con el siguiente formato:
-```/tu/ruta/del/directorio/
+``` 
+/tu/ruta/del/directorio/
 ```
 Por ejemplo: 
 ```/home/user/Música/```
