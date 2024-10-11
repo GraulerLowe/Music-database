@@ -2,30 +2,8 @@ package Base
 
 import (
 	"database/sql"
-	"fmt"
-	"log"
-
 	_ "github.com/mattn/go-sqlite3"
 )
-
-func main() {
-	db, err := sql.Open("sqlite3", "./music.db")
-
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	defer db.Close()
-
-	var version string
-	err = db.QueryRow("SELECT SQLITE_VERSION()").Scan(&version)
-
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	fmt.Println(version)
-}
 
 func CrearTablas(db *sql.DB) error {
     esquemaSQL := `
@@ -86,6 +64,9 @@ func CrearTablas(db *sql.DB) error {
     `
 
     _, err := db.Exec(esquemaSQL)
+	if err != nil {
+        return err
+    }
     return err
 }
 

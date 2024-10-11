@@ -6,7 +6,7 @@ import (
 	"os"
 	"path/filepath"
 	"time"
-
+	"fmt"
 	"github.com/dhowden/tag"
 )
 
@@ -16,7 +16,7 @@ type SongMetaData struct {
 	Album  string
 	Year   int
 	Genre  string
-	Track       int
+	Track       string
     TotalTracks int
 }
 
@@ -54,7 +54,7 @@ func MinarDirectorio(ruta string) ([]SongMetaData, error) {
 				Album:  metadata.Album(),
 				Year:   metadata.Year(),
 				Genre:  metadata.Genre(),
-				Track:       track,
+				Track:       fmt.Sprintf("%d/%d", track, totalTracks),
                 TotalTracks: totalTracks,
 			}
 
@@ -69,13 +69,13 @@ func MinarDirectorio(ruta string) ([]SongMetaData, error) {
 				song.Album = filepath.Base(filepath.Dir(path)) // Usar nombre del directorio si no hay álbum
 			}
 			if song.Year == 0 {
-				song.Year = time.Now().Year() // Año actual si falta
+				song.Year = time.Now().Year()
 			}
 			if song.Genre == "" {
 				song.Genre = "Unknown"
 			}
-			if song.Track == 0 {
-				song.Track = 1 // Valor por defecto para el número de pista
+			if song.Track == "0/0" {
+				song.Track = "1/1" // Valor por defecto para el número de pista
 			}
 
 			songs = append(songs, song)
