@@ -19,7 +19,7 @@ func CrearVentana(onClickFunc func(ruta string), onListFunc func() ([]string, er
     btn := widget.NewButton("Minar Directorio", func() {
         ruta := rutaEntry.Text
         onClickFunc(ruta)
-        resultLabel.SetText("Metadatos guardados exitosamente")
+       
     })
 
     listLabel := widget.NewLabel("")
