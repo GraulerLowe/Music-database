@@ -159,7 +159,7 @@ func BuscarCanciones(criterio string) ([]string, error) {
     defer database.Close()
 
     // Modificar la consulta para que solo busque en el campo "title"
-    rows, err := database.Query(`SELECT title, track, year, genre FROM rolas WHERE title LIKE ?`, "%"+criterio+"%")
+    rows, err := database.Query(`SELECT title, track, year, genre, id_album FROM rolas WHERE title LIKE ?`, "%"+criterio+"%")
     if err != nil {
         return nil, err
     }
@@ -168,14 +168,14 @@ func BuscarCanciones(criterio string) ([]string, error) {
     var canciones []string
     for rows.Next() {
         var title, genre, track string
-        var year int
+        var year, id_album int
         
-        err = rows.Scan(&title, &track, &year, &genre)
+        err = rows.Scan(&title, &track, &year, &genre, &id_album)
         if err != nil {
             return nil, err
         }
         // Formatear los datos y agregarlos al slice de canciones
-        canciones = append(canciones, fmt.Sprintf("Título: %s, Pista: %s, Año: %d, Género: %s", title, track, year, genre))
+        canciones = append(canciones, fmt.Sprintf("Título: %s, Pista: %s, Año: %d, Género: %s, Álbum ID: %d", title, track, year, genre, id_album))
     }
 
     return canciones, nil
